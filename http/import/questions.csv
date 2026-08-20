@@ -1,0 +1,10 @@
+﻿QUESTION,LEVEL,SHORT ANSWER,RESOURCE
+How can we make observable applications?,A2,Observability is the ability to measure the internal state of a system only by its external outputs. For a distributed system like microservices these external outputs called “Telemetry Data”.,https://habr.com/en/companies/otus/articles/1031290/
+Micrometer metrics,A2,"Micrometer metrics collect values continuously, aggregate them and then expose them to backend of your choice. Spring Boot auto-creates metrics by default for:
+HTTP endpoints
+JVM memory
+GC
+CPU
+Thread pools
+Datasource",https://docs.spring.io/spring-boot/reference/actuator/observability.html
+Monitoring vs Observability,A2,"Monitoring tells you when system is broken or acting weird, whereas observability helps you figure out why it broke",https://docs.spring.io/spring-boot/reference/actuator/observability.html
