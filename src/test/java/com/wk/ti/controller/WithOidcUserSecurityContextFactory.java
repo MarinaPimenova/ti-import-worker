@@ -1,4 +1,4 @@
-package com.wk.ti;
+package com.wk.ti.controller;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

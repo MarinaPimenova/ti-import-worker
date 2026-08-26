@@ -1,4 +1,4 @@
-package com.wk.ti;
+package com.wk.ti.controller;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.security.test.context.support.TestExecutionEvent;
