@@ -1,7 +1,7 @@
 package com.wk.ti.controller;
 
 import com.wk.ti.upload.TestService;
-import com.wk.ti.upload.model.ImportResponse;
+import com.wk.ti.upload.model.FileProcessingResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ public class TestController {
     private final TestService testService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ImportResponse> upload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<FileProcessingResponse> upload(@RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(testService.upload(file));
     }
 }
