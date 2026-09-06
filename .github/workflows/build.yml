@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: app-jar
-          path: build/libs/app.jar
+          path: build/libs/*.jar
 
   publish:
     name: Build image & Publish
