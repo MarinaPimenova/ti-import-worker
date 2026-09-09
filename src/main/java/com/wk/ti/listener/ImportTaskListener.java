@@ -2,7 +2,7 @@ package com.wk.ti.listener;
 
 import com.wk.ti.data.processor.DataParser;
 import com.wk.ti.event.ImportCompletedEvent;
-import com.wk.ti.event.ImportEvent;
+import com.wk.ti.event.FileProcessingEvent;
 import com.wk.ti.event.ImportFailedEvent;
 import com.wk.ti.question.model.Question;
 import com.wk.ti.question.model.QuestionRow;
@@ -31,42 +31,42 @@ public class ImportTaskListener {
     private final RabbitTemplate rabbitTemplate;
     private final MeterRegistry meterRegistry;
 
-    private static final String EXCHANGE = "import.exchange";
+    private static final String EXCHANGE = "ti.import";
     private static final String RK_COMPLETED = "import.completed";
     private static final String RK_FAILED = "import.failed";
 
     @RabbitListener(queues = "import-worker.import")
     @Observed(name = "import.worker.process", contextualName = "process-import-file")
-    public void processImport(ImportEvent event) {
-        log.info("Received processing request for importId={}, path={}", event.importId(), event.storedFilePath());
+    public void processImport(FileProcessingEvent event) {
+        log.info("Received processing request for jobId={}, path={}", event.jobId(), event.storedFilePath());
 
         File rawFile = new File(event.storedFilePath());
         if (!rawFile.exists()) {
             String errorMsg = "File not found at path: " + event.storedFilePath();
-            handleFailure(event.importId(), errorMsg, new FileNotFoundException(errorMsg));
+            handleFailure(event.jobId(), errorMsg, new FileNotFoundException(errorMsg));
             return;
         }
         try (InputStream inputStream = new FileInputStream(rawFile)) {
 
             byte[] file = inputStream.readAllBytes();
             List<QuestionRow> questionRows = dataParsers.stream()
-                    .filter(dataParser -> dataParser.support(event.originalFileName()))
+                    .filter(dataParser -> dataParser.support(event.originalFilename()))
                     .findFirst()
-                    .map(dataParser -> dataParser.parse(file, event.originalFileName()))
-                    .orElseThrow(() -> new IllegalArgumentException("Unsupported file type: " + event.originalFileName()));
+                    .map(dataParser -> dataParser.parse(file, event.originalFilename()))
+                    .orElseThrow(() -> new IllegalArgumentException("Unsupported file type: " + event.originalFilename()));
 
-            log.info("Parsed {} questions from file {}", questionRows.size(), event.originalFileName());
+            log.info("Parsed {} questions from file {}", questionRows.size(), event.originalFilename());
 
             List<Question> questions = questionService.generate(questionRows);
             int inserted = questionService.bulkInsert(questions);
 
-            log.info("Successfully imported {} questions from file {}", inserted, event.originalFileName());
+            log.info("Successfully imported {} questions from file {}", inserted, event.originalFilename());
 
-            ImportCompletedEvent successEvent = new ImportCompletedEvent(event.importId(), inserted);
+            ImportCompletedEvent successEvent = new ImportCompletedEvent(event.jobId(), inserted);
             rabbitTemplate.convertAndSend(EXCHANGE, RK_COMPLETED, successEvent);
 
         } catch (Exception ex) {
-            handleFailure(event.importId(), ex.getMessage(), ex);
+            handleFailure(event.jobId(), ex.getMessage(), ex);
         } finally {
             // Clean up temporary local file storage
             if (rawFile.exists() && !rawFile.delete()) {
@@ -75,11 +75,11 @@ public class ImportTaskListener {
         }
     }
 
-    private void handleFailure(String importId, String failureReason, Exception ex) {
-        log.error("Import processing failed for importId={}. Reason: {}", importId, failureReason, ex);
+    private void handleFailure(String jobId, String failureReason, Exception ex) {
+        log.error("Import processing failed for jobId={}. Reason: {}", jobId, failureReason, ex);
         meterRegistry.counter("import.worker.failures", "exception", ex.getClass().getSimpleName()).increment();
 
-        ImportFailedEvent failedEvent = new ImportFailedEvent(importId, failureReason);
+        ImportFailedEvent failedEvent = new ImportFailedEvent(jobId, failureReason);
         rabbitTemplate.convertAndSend(EXCHANGE, RK_FAILED, failedEvent);
     }
 }

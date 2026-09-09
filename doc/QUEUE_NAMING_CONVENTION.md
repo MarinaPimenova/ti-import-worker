@@ -18,10 +18,10 @@ Where:
 
 | Queue                              | Consumer              | Purpose                    |
 | ---------------------------------- | --------------------- | -------------------------- |
-| `ti-import-api.import`             | `ti-import-api`       | Process import requests    |
-| `ti-import-api.import.retry`       | `ti-import-api`       | Retry failed imports       |
-| `ti-import-api.import.fail`        | `ti-import-api`       | Permanently failed imports |
-| `ti-import-api.import.duplicate`   | `ti-import-api`       | Duplicate import requests  |
+| `ti-import-worker.import`             | `ti-import-worker`       | Process import requests    |
+| `ti-import-worker.import.retry`       | `ti-import-worker`       | Retry failed imports       |
+| `ti-import-worker.import.fail`        | `ti-import-worker`       | Permanently failed imports |
+| `ti-import-worker.import.duplicate`   | `ti-import-worker`       | Duplicate import requests  |
 | `ti-notification-api.notification` | `ti-notification-api` | Process notifications      |
 | `ti-audit-api.audit`               | `ti-audit-api`        | Process audit events       |
 | `ti-export-api.export`             | `ti-export-api`       | Process export requests    |
@@ -29,10 +29,10 @@ Where:
 For your current import flow, the core naming would therefore be:
 
 ```text
-ti-import-api.import
-ti-import-api.import.retry
-ti-import-api.import.fail
-ti-import-api.import.duplicate
+ti-import-worker.import
+ti-import-worker.import.retry
+ti-import-worker.import.fail
+ti-import-worker.import.duplicate
 ```
 
 ### Exchanges
@@ -53,7 +53,7 @@ For example:
                     └──────────────┬──────────────┘
                                    │
                                    ▼
-                    ti-import-api.import
+                    ti-import-worker.import
                                    │
                               Import API
                                    │
@@ -62,7 +62,7 @@ For example:
                  success                       failure
                     │                             │
                     ▼                             ▼
-                                      ti-import-api.import.fail
+                                      ti-import-worker.import.fail
 ```
 
 ### Recommended event names
@@ -85,7 +85,7 @@ Orchestrator
 ti.import
      │
      ▼
-ti-import-api.import
+ti-import-worker.import
      │
      ▼
 Import Service
@@ -105,23 +105,23 @@ I would **not** put `.dlx` on a queue that is actually a dead-letter queue unles
 
 ```text
 Exchange:
-ti-import-api.import.dlx
+ti-import-worker.import.dlx
 
 Queue:
-ti-import-api.import.fail
+ti-import-worker.import.fail
 ```
 
 This makes the terminology clear:
 
 ```text
-ti-import-api.import
+ti-import-worker.import
         │
         │ rejected / expired
         ▼
-ti-import-api.import.dlx
+ti-import-worker.import.dlx
         │
         ▼
-ti-import-api.import.fail
+ti-import-worker.import.fail
 ```
 
 For the project, I would adopt this convention globally:

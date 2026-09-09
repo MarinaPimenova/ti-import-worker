@@ -1,6 +1,6 @@
 # TI Import API
 
-`ti-import-api` is a Spring Boot microservice of the **Training Internal (TI) Knowledge Platform** responsible for importing questions from **CSV and Excel** files.
+`ti-import-worker` is a Spring Boot microservice of the **Training Internal (TI) Knowledge Platform** responsible for importing questions from **CSV and Excel** files.
 
 The service processes long-running imports asynchronously using **RabbitMQ** and stores imported questions through the Knowledge Service.
 

@@ -5,7 +5,7 @@ import com.wk.ti.question.model.Question;
 import com.wk.ti.question.model.QuestionRow;
 import com.wk.ti.question.service.QuestionService;
 
-import com.wk.ti.upload.model.ImportResponse;
+import com.wk.ti.upload.model.FileProcessingResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class TestService {
     private final List<DataParser> dataParsers;
     private final QuestionService questionService;
 
-    public ImportResponse upload(MultipartFile file) {
+    public FileProcessingResponse upload(MultipartFile file) {
         // 1. Capture file metadata and content synchronously on the main thread
         String originalFilename = file.getOriginalFilename();
 
@@ -57,6 +57,6 @@ public class TestService {
                 log.error("Async parsing failed for file {}", originalFilename, e);
             }
         });
-        return new ImportResponse(UUID.randomUUID().toString());
+        return new FileProcessingResponse(UUID.randomUUID().toString());
     }
 }
